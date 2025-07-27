@@ -1,8 +1,1 @@
-<div
-  phx-no-format
-  id="refresh-result"
-  class="fade-me-out"
-  hx-trigger="load delay:5s"
-  hx-swap="delete swap:3s"
-  hx-delete={~p"/empty"}
->added {@new_entries_count} new entries</div>
+<.info_notification message={"#{@new_entries_count} new entries"} />
