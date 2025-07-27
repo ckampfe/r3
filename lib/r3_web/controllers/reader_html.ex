@@ -10,6 +10,40 @@ defmodule R3Web.ReaderHTML do
 
   embed_templates "reader_html/*"
 
+  def read_toggle(assigns) do
+    ~H"""
+    <a phx-no-format class="link p-2" href={~p"/feeds/#{@feed.id}?entries_visibility=#{@visibility}"}>View {@visibility}</a>
+    """
+  end
+
+  def info_notification(assigns) do
+    ~H"""
+    <div
+      role="alert"
+      class="sticky alert alert-info absolute inset-0 z-50 my-4 fade-me-out"
+      hx-trigger="load delay:5s"
+      hx-swap="delete swap:2s"
+      hx-delete={~p"/empty"}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        class="h-6 w-6 shrink-0 stroke-current"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        >
+        </path>
+      </svg>
+      <span>{@message}</span>
+    </div>
+    """
+  end
+
   def progress_bar(assigns) do
     ~H"""
     <div class="sticky top-0 z-50 w-full">
