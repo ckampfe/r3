@@ -1,0 +1,34 @@
+<div class="grid container mx-auto px-4">
+  <div>
+    <a class="link" hx-post="/feeds" hx-prompt="Feed URL" hx-swap="none">Add feed</a>
+    <table class="table">
+      <thead>
+        <th>Feed</th>
+        <th class="hidden sm:table-cell">Most recent entry</th>
+        <th class="hidden sm:table-cell">Last refreshed</th>
+        <th class="hidden sm:table-cell">Unread entries</th>
+        <th class="hidden sm:table-cell">Read entries</th>
+      </thead>
+      <tbody>
+        <%= for feed <- @feeds do %>
+          <tr>
+            <td class="text-center sm:text-left">
+              <a class="link" href={"/feeds/#{feed.id}"}>
+                {feed.title}
+              </a>
+            </td>
+            <td class="hidden sm:table-cell">{feed.most_recent_entry}</td>
+            <td class="hidden sm:table-cell">{feed.refreshed_at}</td>
+            <td class="hidden sm:table-cell">{feed.unread_entries}</td>
+            <td class="hidden sm:table-cell">{feed.read_entries}</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+  document.body.addEventListener('feedCreateError', function(evt) {
+      alert(evt.detail.value);
+  })
+</script>

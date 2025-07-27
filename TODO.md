@@ -1,0 +1,14 @@
+- [x] add a feed
+- [x] refresh single feed
+- [ ] refresh single feed with appropriate caching headers
+- [ ] refresh all feeds
+- [ ] better "flash"/notification system for errors/status updates
+- [x] migrations
+- [x] view all feeds
+- [x] view single feed's entries
+- [x] view entry
+- [x] syntax highlighting for code in an entry
+- [x] horizontal scrolling progress bar
+- [ ] literally any tests
+- [x] toggle entry read/unread on entry
+- [ ] toggle entry read/unread on feed
