@@ -1,101 +1,78 @@
-<div class="grid container mx-auto px-4">
-  <div class="breadcrumbs text-sm">
-    <ul>
-      <li><a href="/">Feeds</a></li>
-      <li>
-        <a href={~p"/feeds/#{@feed.id}"}>
-          {@feed.title}
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div class="p-2">
-    <header class="flex flex-wrap justify-start">
-      <h1>{@feed.title}</h1>
-      <div>
-        <a
-          id="refresher"
-          class="link p-2"
-          hx-put={~p"/feeds/#{@feed.id}/refresh"}
-          hx-target="closest :not(#refresher)"
-          hx-swap="afterend"
-        >
-          Refresh feed
-        </a>
-      </div>
-      <div class="ml-auto">
-        <%= case @entries_visibility do %>
-          <% "unread" -> %>
-            <a
-              phx-no-format
-              class="link p-2"
-              href={~p"/feeds/#{@feed.id}?entries_visibility=read"}
-            >View read entries</a>
-            <a class="link p-2" href={~p"/feeds/#{@feed.id}?entries_visibility=all"}>
-              View all entries
-            </a>
-          <% "read" -> %>
-            <a
-              phx-no-format
-              class="link p-2"
-              href={~p"/feeds/#{@feed.id}?entries_visibility=unread"}
-            >View unread entries</a>
-            <a class="link p-2" href={~p"/feeds/#{@feed.id}?entries_visibility=all"}>
-              View all entries
-            </a>
-          <% "all" -> %>
-            <a
-              phx-no-format
-              class="link p-2"
-              href={~p"/feeds/#{@feed.id}?entries_visibility=unread"}
-            >View unread entries</a>
-            <a class="link p-2" href={~p"/feeds/#{@feed.id}?entries_visibility=read"}>
-              View read entries
-            </a>
-          <% _ -> %>
-            <a class="link p-2" href={~p"/feeds/#{@feed.id}?entries_visibility=read"}>
-              View read entries
-            </a>
-            <a class="link p-2" href={~p"/feeds/#{@feed.id}?entries_visibility=all"}>
-              View all entries
-            </a>
-        <% end %>
-      </div>
-    </header>
-    <main>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th class="hidden sm:table-cell">Publication date</th>
-            <%= if @entries_visibility in [:read, :all] do %>
-              <th class="hidden sm:table-cell">Read at</th>
-            <% end %>
-            <th></th>
-            <th class="hidden sm:table-cell"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for entry <- @entries do %>
-            <tr>
-              <td class="text-center sm:text-left">
-                <a class="link" href={~p"/entries/#{entry.id}"}>
-                  {entry.title}
-                </a>
-              </td>
-              <td class="hidden sm:table-cell">{entry.pub_date}</td>
-              <%= if @entries_visibility in ["read", "all"] do %>
-                <td class="hidden sm:table-cell">{entry.read_at}</td>
-              <% end %>
-              <td class="hidden sm:table-cell">
-                <a class="link" href={entry.link} target="_blank">
-                  View original
-                </a>
-              </td>
-            </tr>
+<div id="container" class="grid relative container mx-auto px-4">
+  <div class="absolute mx-auto items-center justify-center w-full">
+    <div class="breadcrumbs text-sm">
+      <ul>
+        <li><a href="/">Feeds</a></li>
+        <li>
+          <a href={~p"/feeds/#{@feed.id}"}>
+            {@feed.title}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="p-2">
+      <header class="flex flex-wrap justify-start">
+        <h1>{@feed.title}</h1>
+        <div class="ml-auto">
+          <a
+            phx-no-format
+            id="refresher"
+            class="link p-2"
+            hx-put={~p"/feeds/#{@feed.id}/refresh"}
+            hx-target="#container"
+            hx-swap="afterbegin"
+          >Refresh feed</a>
+          <%= case @entries_visibility do %>
+            <% "unread" -> %>
+              <.read_toggle feed={@feed} visibility="read" />
+              <.read_toggle feed={@feed} visibility="all" />
+            <% "read" -> %>
+              <.read_toggle feed={@feed} visibility="unread" />
+              <.read_toggle feed={@feed} visibility="all" />
+            <% "all" -> %>
+              <.read_toggle feed={@feed} visibility="unread" />
+              <.read_toggle feed={@feed} visibility="read" />
+            <% _ -> %>
+              <.read_toggle feed={@feed} visibility="read" />
+              <.read_toggle feed={@feed} visibility="all" />
           <% end %>
-        </tbody>
-      </table>
-    </main>
+        </div>
+      </header>
+      <main>
+        <table class="table md:table-md">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th class="hidden sm:table-cell">Publication date</th>
+              <%= if @entries_visibility in [:read, :all] do %>
+                <th class="hidden sm:table-cell">Read at</th>
+              <% end %>
+              <th></th>
+              <th class="hidden sm:table-cell"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for entry <- @entries do %>
+              <tr>
+                <td class="text-center sm:text-left">
+                  <a class="link" href={~p"/entries/#{entry.id}"}>
+                    {entry.title}
+                  </a>
+                </td>
+                <td class="hidden sm:table-cell">{entry.pub_date}</td>
+                <%= if @entries_visibility in ["read", "all"] do %>
+                  <td class="hidden sm:table-cell">{entry.read_at}</td>
+                <% end %>
+                <td class="hidden sm:table-cell">
+                  <a class="link" href={entry.link} target="_blank">
+                    View original
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </main>
+    </div>
   </div>
 </div>
