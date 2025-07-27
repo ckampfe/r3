@@ -1,5 +1,5 @@
 <.progress_bar></.progress_bar>
-<div class="grid container mx-auto px-4">
+<div class="container mx-auto px-4">
   <div class="breadcrumbs text-sm">
     <ul>
       <li><a href="/">Feeds</a></li>
@@ -7,17 +7,16 @@
       <li><a href={~p"/entries/#{@entry.id}"}>{@entry.title}</a></li>
     </ul>
   </div>
-  <div class="grid grid-cols-1 justify-items-center p-4">
-    <div class="p-4">
-      <article class="prose">
-        <h2>{@entry.title}</h2>
-        <h5>{@entry.pub_date}</h5>
-        {raw(@cleaned)}
-      </article>
+  <div class="p-4">
+    <article class="prose mx-auto">
+      <h2>{@entry.title}</h2>
+      <h5>{@entry.pub_date}</h5>
+      {raw(@cleaned)}
+    </article>
 
+    <footer>
       <div class="divider"></div>
-
-      <div>
+      <div class="flex justify-center mx-auto">
         <a class="link p-2" href={~p"/feeds/#{@entry.feed_id}"}>Back</a>
         <%!-- lol --%>
         <%!-- https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.HTMLFormatter.html#module-skip-formatting --%>
@@ -29,6 +28,6 @@
         ><%= if @entry.read_at do %>Mark unread<% else %>Mark read<% end %></a>
         <a class="link p-2" href={@entry.link} target="_blank">View original</a>
       </div>
-    </div>
+    </footer>
   </div>
 </div>
