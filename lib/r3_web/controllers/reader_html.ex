@@ -14,7 +14,7 @@ defmodule R3Web.ReaderHTML do
     ~H"""
     <div class="sticky top-0 z-50 w-full">
       <div class="relative overflow-hidden h-1.5 bg-transparent w-full">
-        <div id="progress" class="h-full w-full bg-pink-500" style="width: 0%"></div>
+        <div id="progress" class="h-full w-full bg-mypink" style="width: 0%"></div>
       </div>
 
       <script>
