@@ -1,6 +1,8 @@
 defmodule R3Web.ReaderController do
   use R3Web, :controller
 
+  require Logger
+
   alias R3.Reader.{Entry, Feed}
   alias R3.Repo
   import Ecto.Query
@@ -109,59 +111,93 @@ defmodule R3Web.ReaderController do
     feed =
       Feed
       |> where([f], f.id == ^feed_id)
-      |> select([:id, :feed_link])
+      |> select([:id, :feed_link, :etag])
       |> Repo.one!()
 
-    {:ok, feed_response} = Req.get(feed.feed_link)
-    {:ok, challenger_feed} = FastRSS.parse_rss(feed_response.body)
+    headers = [{"User-Agent", "r3/1.0"}]
 
-    existing_entries_links =
-      Entry
-      |> where([e], e.feed_id == ^feed_id)
-      |> select([e], e.link)
-      |> Repo.all()
-      |> MapSet.new()
+    headers =
+      if feed.etag do
+        headers ++ [{"If-None-Match", feed.etag}]
+      else
+        headers
+      end
 
-    new_entries =
-      challenger_feed
-      |> Map.fetch!("items")
-      |> Enum.reject(fn entry ->
-        MapSet.member?(existing_entries_links, Map.fetch!(entry, "link"))
-      end)
+    {:ok, feed_response} =
+      Req.get(url: feed.feed_link, headers: headers)
 
-    Repo.transact(fn ->
-      now = DateTime.utc_now()
+    case feed_response.status do
+      304 ->
+        Logger.debug("got 304, feed is the same")
 
-      Feed
-      |> where([f], f.id == ^feed_id)
-      |> update([f], set: [refreshed_at: ^now])
-      |> Repo.update_all([])
+        conn
+        |> put_root_layout(false)
+        |> render(:feed_refresh, new_entries_count: 0)
 
-      new_entry = Ecto.build_assoc(feed, :entries)
+      200 ->
+        Logger.debug("got 200, feed has changed, calculating new entries")
 
-      # again N+1, but find because of SQLite
-      Enum.each(new_entries, fn entry ->
-        entry =
-          entry
-          |> Map.update!("pub_date", fn
-            nil ->
-              nil
+        {:ok, challenger_feed} = FastRSS.parse_rss(feed_response.body)
 
-            pub_date ->
-              DateTimeParser.parse_datetime!(pub_date)
+        existing_entries_links =
+          Entry
+          |> where([e], e.feed_id == ^feed_id)
+          |> select([e], e.link)
+          |> Repo.all()
+          |> MapSet.new()
+
+        new_entries =
+          challenger_feed
+          |> Map.fetch!("items")
+          |> Enum.reject(fn entry ->
+            MapSet.member?(existing_entries_links, Map.fetch!(entry, "link"))
           end)
 
-        new_entry
-        |> Entry.changeset(entry)
-        |> Repo.insert!()
-      end)
+        Repo.transact(fn ->
+          now = DateTime.utc_now()
 
-      {:ok, nil}
-    end)
+          feed_query =
+            Feed
+            |> where([f], f.id == ^feed_id)
+            |> update([f], set: [refreshed_at: ^now])
 
-    conn
-    |> put_root_layout(false)
-    |> render(:feed_refresh, new_entries_count: Enum.count(new_entries))
+          feed_query =
+            if etag = feed_response.headers["etag"] do
+              [etag] = etag
+              etag = String.replace(etag, "\"", "")
+              update(feed_query, [f], set: [etag: ^etag])
+            else
+              feed_query
+            end
+
+          Repo.update_all(feed_query, [])
+
+          new_entry = Ecto.build_assoc(feed, :entries)
+
+          # again N+1, but find because of SQLite
+          Enum.each(new_entries, fn entry ->
+            entry =
+              entry
+              |> Map.update!("pub_date", fn
+                nil ->
+                  nil
+
+                pub_date ->
+                  DateTimeParser.parse_datetime!(pub_date)
+              end)
+
+            new_entry
+            |> Entry.changeset(entry)
+            |> Repo.insert!()
+          end)
+
+          {:ok, nil}
+        end)
+
+        conn
+        |> put_root_layout(false)
+        |> render(:feed_refresh, new_entries_count: Enum.count(new_entries))
+    end
   end
 
   def entry_show(conn, %{"entry_id" => entry_id}) do
