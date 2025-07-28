@@ -10,13 +10,10 @@ defmodule R3.Application do
     children = [
       R3Web.Telemetry,
       R3.Repo,
-      {Ecto.Migrator,
-       repos: Application.fetch_env!(:r3, :ecto_repos), skip: skip_migrations?()},
+      {Ecto.Migrator, repos: Application.fetch_env!(:r3, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:r3, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: R3.PubSub},
-      # Start a worker by calling: R3.Worker.start_link(arg)
-      # {R3.Worker, arg},
-      # Start to serve requests, typically the last entry
+      {Task.Supervisor, name: R3.TaskSupervisor},
       R3Web.Endpoint
     ]
 

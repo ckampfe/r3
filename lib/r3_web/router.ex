@@ -19,6 +19,7 @@ defmodule R3Web.Router do
 
     get "/", ReaderController, :index
     post "/feeds", ReaderController, :feed_create
+    put "/feeds/refresh", ReaderController, :feeds_refresh
     get "/feeds/:feed_id", ReaderController, :feed_show
     put "/feeds/:feed_id/refresh", ReaderController, :feed_refresh
     get "/entries/:entry_id", ReaderController, :entry_show

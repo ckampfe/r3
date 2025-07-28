@@ -1,6 +1,17 @@
-<div class="grid container mx-auto px-4">
+<div id="container" class="grid container mx-auto px-4">
   <div>
-    <a class="link" hx-post="/feeds" hx-prompt="Feed URL" hx-swap="none">Add feed</a>
+    <div class="flex justify-end">
+      <a class="link pl-2" hx-post={~p"/feeds"} hx-prompt="Feed URL" hx-swap="none">Add feed</a>
+      <a
+        id="refresher"
+        class="link pl-2"
+        hx-put={~p"/feeds/refresh"}
+        hx-target="#container"
+        hx-swap="afterbegin"
+      >
+        Refresh feeds
+      </a>
+    </div>
     <table class="table">
       <thead>
         <th>Feed</th>
@@ -13,7 +24,7 @@
         <%= for feed <- @feeds do %>
           <tr>
             <td class="text-center sm:text-left">
-              <a class="link" href={"/feeds/#{feed.id}"}>
+              <a class="link" href={~p"/feeds/#{feed.id}"}>
                 {feed.title}
               </a>
             </td>

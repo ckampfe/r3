@@ -1,7 +1,7 @@
 - [x] add a feed
 - [x] refresh single feed
 - [x] refresh single feed with etag and If-None-Match header
-- [ ] refresh all feeds
+- [x] refresh all feeds
 - [ ] better "flash"/notification system for errors/status updates
 - [x] migrations
 - [x] view all feeds
