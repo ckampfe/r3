@@ -190,7 +190,8 @@ defmodule R3Web.ReaderController do
         :content,
         :pub_date,
         :link,
-        :read_at
+        :read_at,
+        :inserted_at
       ])
       |> Repo.one!()
 

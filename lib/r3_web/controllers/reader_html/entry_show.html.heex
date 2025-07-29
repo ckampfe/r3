@@ -10,7 +10,10 @@
   <div class="p-4">
     <article class="prose mx-auto">
       <h2>{@entry.title}</h2>
-      <h5>{@entry.pub_date}</h5>
+      <%= if @entry.pub_date do %>
+        <h5>Published: {@entry.pub_date}</h5>
+      <% end %>
+      <h5>Stored: {@entry.inserted_at}</h5>
       {raw(@cleaned)}
     </article>
 
