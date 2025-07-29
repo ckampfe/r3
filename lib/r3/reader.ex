@@ -147,10 +147,6 @@ defmodule Reader do
         end)
 
         {:ok, Enum.count(new_entries)}
-
-        # conn
-        # |> put_root_layout(false)
-        # |> render(:feed_refresh, new_entries_count: Enum.count(new_entries))
     end
   end
 end
