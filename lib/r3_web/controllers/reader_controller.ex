@@ -22,7 +22,7 @@ defmodule R3Web.ReaderController do
         most_recent_entry: max(fragment("coalesce(?, ?)", e.pub_date, e.inserted_at))
       })
       |> group_by([f], f.id)
-      |> order_by([f], f.title)
+      |> order_by([f], fragment("lower(?)", f.title))
       |> Repo.all()
 
     render(conn, :index, feeds: feeds)
