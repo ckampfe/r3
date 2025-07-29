@@ -123,7 +123,6 @@ defmodule R3Web.ReaderController do
       |> Enum.map(fn feed -> feed.id end)
 
     %{successes: successes, errors: errors} =
-      res =
       Task.Supervisor.async_stream_nolink(R3.TaskSupervisor, feed_ids, Reader, :refresh_feed, [],
         ordered: false,
         on_timeout: :kill_task,
@@ -140,7 +139,23 @@ defmodule R3Web.ReaderController do
           end)
       end)
 
-    dbg(res)
+    # TODO what to do with these titles and errors
+    if !Enum.empty?(errors) do
+      error_map = Enum.into(errors, %{})
+      error_feed_ids = Map.keys(error_map)
+
+      error_titles =
+        Feed
+        |> where([f], f.id in ^error_feed_ids)
+        |> select([:id, :title])
+        |> Repo.all()
+        |> Enum.map(fn feed -> {feed.id, feed.title} end)
+        |> Enum.into(%{})
+
+      Map.merge(error_titles, error_map, fn _id, feed_title, error_reason ->
+        %{title: feed_title, error: error_reason}
+      end)
+    end
 
     # this is no longer a named template in the reader_html directory,
     # like, info_notification.html.heex.
