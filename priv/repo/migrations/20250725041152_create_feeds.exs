@@ -8,7 +8,7 @@ defmodule R3.Repo.Migrations.CreateFeeds do
       add :link, :text
       add :feed_kind, :text
       add :refreshed_at, :utc_datetime
-      add :etag, :text
+      add :latest_etag, :text
 
       timestamps(type: :utc_datetime)
     end

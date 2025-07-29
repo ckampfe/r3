@@ -1,4 +1,4 @@
-defmodule Reader do
+defmodule R3.Reader do
   require Logger
   alias R3.Repo
   alias R3.Reader.{Entry, Feed}
@@ -11,10 +11,10 @@ defmodule Reader do
     |> Repo.one()
   end
 
-  def add_feed(parsed_feed, feed_link) do
+  def add_feed(parsed_feed, feed_kind, feed_link) do
     Repo.transact(fn ->
       feed =
-        %Feed{feed_link: feed_link, feed_kind: "rss"}
+        %Feed{feed_link: feed_link, feed_kind: Atom.to_string(feed_kind)}
         |> Feed.changeset(parsed_feed)
         |> Repo.insert!()
 
@@ -66,30 +66,30 @@ defmodule Reader do
     feed =
       Feed
       |> where([f], f.id == ^feed_id)
-      |> select([:id, :feed_link, :etag])
+      |> select([:id, :feed_link, :latest_etag])
       |> Repo.one!()
 
-    headers = [{"User-Agent", "r3/1.0"}]
+    headers = [{"User-Agent", "r3/0.1"}]
 
     headers =
-      if feed.etag do
-        [{"If-None-Match", feed.etag} | headers]
+      if feed.latest_etag do
+        [{"If-None-Match", feed.latest_etag} | headers]
       else
         headers
       end
 
     {:ok, feed_response} =
-      Req.get(url: feed.feed_link, headers: headers)
+      Req.get(url: feed.feed_link, headers: headers, http_errors: :raise)
 
     case feed_response.status do
       304 ->
-        Logger.debug("got 304, feed is the same")
+        Logger.debug("#{feed.feed_link}: got 304, feed is the same")
         {:ok, 0}
 
       200 ->
-        Logger.debug("got 200, feed has changed, calculating new entries")
+        Logger.debug("#{feed.feed_link}: got 200, feed has changed, calculating new entries")
 
-        {:ok, challenger_feed} = FastRSS.parse_rss(feed_response.body)
+        {:ok, _feed_kind, challenger_feed} = try_to_parse_feed(feed_response.body)
 
         existing_entries_links =
           Entry
@@ -100,7 +100,7 @@ defmodule Reader do
 
         new_entries =
           challenger_feed
-          |> Map.fetch!("items")
+          |> Map.fetch!("entries")
           |> Enum.reject(fn entry ->
             MapSet.member?(existing_entries_links, Map.fetch!(entry, "link"))
           end)
@@ -117,7 +117,7 @@ defmodule Reader do
             if etag = feed_response.headers["etag"] do
               [etag] = etag
               etag = String.replace(etag, "\"", "")
-              update(feed_query, [f], set: [etag: ^etag])
+              update(feed_query, [f], set: [latest_etag: ^etag])
             else
               feed_query
             end
@@ -147,6 +147,47 @@ defmodule Reader do
         end)
 
         {:ok, Enum.count(new_entries)}
+    end
+  end
+
+  def try_to_parse_feed(s) when is_binary(s) do
+    case FastRSS.parse_rss(s) do
+      {:ok, challenger_feed} ->
+        {items, challenger_feed} = Map.pop!(challenger_feed, "items")
+        {:ok, :rss, Map.put(challenger_feed, "entries", items)}
+
+      {:error, _} ->
+        Logger.debug("could not parse as RSS, trying as Atom")
+
+        {:ok, challenger_feed} = FastRSS.parse_atom(s)
+
+        challenger_feed =
+          Map.update!(challenger_feed, "entries", fn entries ->
+            Enum.map(entries, fn entry ->
+              {links, entry} = Map.pop!(entry, "links")
+
+              link =
+                links
+                |> List.first()
+                |> Map.fetch!("href")
+
+              entry = Map.put(entry, "link", link)
+
+              {pub_date, entry} = Map.pop!(entry, "published")
+
+              entry = Map.put(entry, "pub_date", pub_date)
+
+              {%{"value" => title}, entry} = Map.pop!(entry, "title")
+
+              entry = Map.put(entry, "title", title)
+
+              {%{"value" => content}, entry} = Map.pop!(entry, "content")
+
+              Map.put(entry, "content", content)
+            end)
+          end)
+
+        {:ok, :atom, challenger_feed}
     end
   end
 end

@@ -3,6 +3,7 @@
 - [x] refresh single feed with etag and If-None-Match header
 - [x] refresh all feeds
 - [ ] better "flash"/notification system for errors/status updates
+- [x] also try to parse as Atom feeds
 - [x] migrations
 - [x] view all feeds
 - [x] view single feed's entries

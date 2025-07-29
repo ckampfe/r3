@@ -3,6 +3,7 @@ defmodule R3Web.ReaderController do
 
   require Logger
 
+  alias R3.Reader
   alias R3.Reader.{Entry, Feed}
   alias R3.Repo
   import Ecto.Query
@@ -33,8 +34,8 @@ defmodule R3Web.ReaderController do
          feed_link = URI.to_string(parsed_uri),
          nil <- Reader.feed_exists?(feed_link),
          {:ok, feed_response} <- Req.get(feed_link),
-         {:ok, parsed_feed} <- FastRSS.parse_rss(feed_response.body),
-         {:ok, _} <- Reader.add_feed(parsed_feed, feed_link) do
+         {:ok, feed_kind, parsed_feed} <- Reader.try_to_parse_feed(feed_response.body),
+         {:ok, _} <- Reader.add_feed(parsed_feed, feed_kind, feed_link) do
       conn
       |> put_resp_header("HX-Location", "/")
       |> send_resp(201, "")
@@ -108,11 +109,12 @@ defmodule R3Web.ReaderController do
   #  - update feed refreshed_at
   #  - TODO v2: update_feed_etag
   def feed_refresh(conn, %{"feed_id" => feed_id}) do
-    {:ok, new_entries_count} = Reader.refresh_feed(feed_id)
+    {:ok, _new_entries_count} = Reader.refresh_feed(feed_id)
 
+    # forcing a reload is stupid but works
     conn
-    |> put_root_layout(false)
-    |> render(:info_notification, message: "#{new_entries_count} new entries")
+    |> put_resp_header("HX-Refresh", "true")
+    |> send_resp(200, "")
   end
 
   def feeds_refresh(conn, _params) do
@@ -152,8 +154,13 @@ defmodule R3Web.ReaderController do
         |> Enum.map(fn feed -> {feed.id, feed.title} end)
         |> Enum.into(%{})
 
-      Map.merge(error_titles, error_map, fn _id, feed_title, error_reason ->
-        %{title: feed_title, error: error_reason}
+      title_and_errors =
+        Map.merge(error_titles, error_map, fn _id, feed_title, error_reason ->
+          %{title: feed_title, error: error_reason}
+        end)
+
+      Enum.each(title_and_errors, fn {_id, %{title: title, error: error}} ->
+        Logger.error("#{title}: #{inspect(error)}")
       end)
     end
 
