@@ -73,7 +73,7 @@ defmodule Reader do
 
     headers =
       if feed.etag do
-        headers ++ [{"If-None-Match", feed.etag}]
+        [{"If-None-Match", feed.etag} | headers]
       else
         headers
       end
