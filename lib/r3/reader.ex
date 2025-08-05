@@ -181,9 +181,13 @@ defmodule R3.Reader do
 
               entry = Map.put(entry, "title", title)
 
-              {%{"value" => content}, entry} = Map.pop!(entry, "content")
+              case Map.pop(entry, "content") do
+                {%{"value" => content}, entry} ->
+                  Map.put(entry, "content", content)
 
-              Map.put(entry, "content", content)
+                {nil, entry} ->
+                  Map.put(entry, "content", "")
+              end
             end)
           end)
 
