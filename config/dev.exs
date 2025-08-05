@@ -2,7 +2,11 @@ import Config
 
 # Configure your database
 config :r3, R3.Repo,
-  database: Path.expand("../r3_dev.db", __DIR__),
+  # database: Path.expand("../r3_dev.db", __DIR__),
+  database: Path.expand("../ck.db", __DIR__),
+  synchronous: :full,
+  cache_size: -256_000,
+  busy_timeout: 5_000,
   pool_size: 5,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true

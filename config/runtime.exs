@@ -30,7 +30,10 @@ if config_env() == :prod do
 
   config :r3, R3.Repo,
     database: database_path,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5"),
+    synchronous: :full,
+    cache_size: -256_000,
+    busy_timeout: 5_000
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
