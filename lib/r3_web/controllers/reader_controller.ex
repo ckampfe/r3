@@ -25,7 +25,7 @@ defmodule R3Web.ReaderController do
       |> order_by([f], fragment("lower(?)", f.title))
       |> Repo.all()
 
-    render(conn, :index, feeds: feeds)
+    render(conn, :index, page_title: "Feeds", feeds: feeds)
   end
 
   def feed_create(conn, _params) do
@@ -93,6 +93,7 @@ defmodule R3Web.ReaderController do
       |> Repo.one()
 
     render(conn, :feed_show,
+      page_title: feed.title,
       entries_visibility: cs.entries_visibility,
       feed: feed,
       entries: entries
@@ -220,6 +221,7 @@ defmodule R3Web.ReaderController do
     cleaned = HtmlSanitizeEx.markdown_html(content)
 
     render(conn, :entry_show,
+      page_title: entry.title,
       entry: entry,
       feed: feed,
       cleaned: cleaned
