@@ -100,15 +100,6 @@ defmodule R3Web.ReaderController do
     )
   end
 
-  #  get feed entries
-  #  TODO v2: if cache miss
-  #  get links for challenger entries
-  #  get links for existing entries
-  #  set = remote_entries - existing_entries
-  #  in transaction:
-  #  - for entry in set: insert
-  #  - update feed refreshed_at
-  #  - TODO v2: update_feed_etag
   def feed_refresh(conn, %{"feed_id" => feed_id}) do
     {:ok, _new_entries_count} = Reader.refresh_feed(feed_id)
 
