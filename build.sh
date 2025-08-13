@@ -2,6 +2,8 @@
 
 export MIX_ENV=prod
 
+echo "MIX_ENV=${MIX_ENV}"
+echo
 echo "Building assets..."
 echo
 mix assets.build
