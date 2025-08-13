@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+    	<dict>
+           <key>DATABASE_PATH</key>
+           <string>TODO</string>
+           <key>PHX_SERVER</key>
+           <string>true</string>
+           <key>PHX_HOST</key>
+           <string>localhost</string>
+           <key>PORT</key>
+           <string>TODO</string>
+           <key>SECRET_KEY_BASE</key>
+           <string>TODO</string>
+    	</dict>
+
+	<key>Label</key>
+	<string>ckampfe.r3</string>
+	<key>ProgramArguments</key>
+	<array>
+    <string>/Users/clark/code/r3/_build/prod/rel/r3/bin/r3</string>
+    <string>start</string>
+	</array>
+
+	<key>StandardErrorPath</key>
+	<string>error.log</string>
+	<key>StandardOutPath</key>
+	<string>stdout.log</string>
+
+	<key>WorkingDirectory</key>
+  <string>/Users/clark/code/r3</string>
+
+	<key>KeepAlive</key>
+    	<true/>
+</dict>
+</plist>
