@@ -26,7 +26,7 @@ erl_crash.dump
 r3-*.tar
 
 # Ignore assets that are produced by build tools.
-/priv/static/assets/
+/priv/static/
 
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
@@ -39,3 +39,6 @@ npm-debug.log
 *.db
 *.db-*
 
+# logs
+stdout.log
+error.log
