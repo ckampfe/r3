@@ -20,6 +20,6 @@ defmodule R3.Reader.Entry do
   def changeset(entry, attrs) do
     entry
     |> cast(attrs, [:title, :author, :pub_date, :description, :content, :link, :read_at])
-    |> validate_required([:title, :pub_date, :link])
+    |> validate_required([:title, :link])
   end
 end
