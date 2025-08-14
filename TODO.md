@@ -13,3 +13,4 @@
 - [ ] literally any tests
 - [x] toggle entry read/unread on entry
 - [ ] toggle entry read/unread on feed
+- [ ] fix bug where feeds don't have a pub_date
