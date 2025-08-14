@@ -6,11 +6,7 @@ echo "MIX_ENV=${MIX_ENV}"
 echo
 echo "Building assets..."
 echo
-mix assets.build
-echo
-echo "Digesting..."
-echo
-mix phx.digest
+mix assets.deploy
 echo
 echo "Building release..."
 echo
